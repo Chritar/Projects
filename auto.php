@@ -1,7 +1,7 @@
 <?php
 require_once "pdo.php";
 
-if ( ! isset($_GET['name']) || strlen($_GET['name']) < 1  ) {
+if ( !isset($_GET['name']) || strlen($_GET['name']) < 1  ) {
     die('Name parameter missing');
     }
 
@@ -9,39 +9,35 @@ if (isset($_POST['logout'])) {
     header("Location: index.php");
     }
 
-if (isset($_POST['carname'])) {
+if (!isset($_POST['carname']) || strlen($_POST['carname']) < 1) {
+    echo("Make darf nicht leer sein");
+}
 
-    if (isset($_POST['carmileage']) && isset($_POST['manufactured']) && is_numeric($_POST['carmileage']) && is_numeric($_POST['manufactured'])) {
+if (isset($_POST['carmileage']) && isset($_POST['manufactured']) && is_numeric($_POST['carmileage']) && is_numeric($_POST['manufactured'])) {
         
-        $carname = $_POST['carname'];
-        $sql = "SELECT 1 FROM autos WHERE make =?";
+    $sql = "SELECT 1 FROM autos WHERE make =?";
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$carname]); 
-        $row = $stmt->fetch();
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$carname]); 
+    $row = $stmt->fetch();
 
-            if ($row === TRUE)  {
-                echo("already exists");
-            } else {
-
-                $sql = "INSERT INTO autos (make, mileage, year)
-                 VALUES (:carname, :carmileage, :manufactured)";
-
-                 $stmt = $pdo->prepare($sql);
-                 $stmt->execute(array(
-                    ':carname' => $_POST['carname'],
-                    ':carmileage' => $_POST['carmileage'],
-                    ':manufactured' => $_POST['manufactured']));
-                echo("erstellt");
-            }
+    if ($row === TRUE)  {
+        echo("already exists");
 
     } else {
-        echo("Milage und Year müssen numerisch sein!");
-        return;
+        $sql = "INSERT INTO autos (make, mileage, year)
+        VALUES (:carname, :carmileage, :manufactured)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array(
+            ':carname' => $_POST['carname'],
+            ':carmileage' => $_POST['carmileage'],
+            ':manufactured' => $_POST['manufactured']));
+        echo("erstellt");
     }
 
 } else {
-    echo("make is ein Pflichtfeld!");
+    echo("Milage und Year müssen numerisch sein!");
     return;
 }
 
@@ -70,6 +66,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <input type="number" name="manufactured"></br>
         <input type="submit" name="add" value="Add">
         <input type="submit" name="logout" value="Logout">
+        </form>
     </div>
     <table border="1">
         <?php
